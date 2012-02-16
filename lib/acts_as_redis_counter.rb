@@ -1,3 +1,5 @@
+require "acts_as_redis_counter/version"
+
 # ActsAsRedisCounter
 module ActsAsRedisCounter #:nodoc:
     def self.included(base)
@@ -82,3 +84,4 @@ module ActsAsRedisCounter #:nodoc:
     end
 end
 
+ActiveRecord::Base.send(:include, ActsAsRedisCounter)
