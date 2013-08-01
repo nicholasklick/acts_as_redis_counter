@@ -23,22 +23,22 @@ module ActsAsRedisCounter #:nodoc:
           key = redis_counter_key(attribute)
 
           send("redis_counter_load_#{attribute}")
-          REDIS.incrby(key, n)
+          $redis.incrby(key, n)
           send("redis_counter_flush_#{attribute}")
-          REDIS[key]
+          $redis[key]
         end
 
         # getter
         define_method("redis_counter_#{attribute}") do
           key = redis_counter_key(attribute)
-          REDIS[key] = send(attribute) if REDIS[key].nil?
-          REDIS[key]
+          $redis[key] = send(attribute) if $redis[key].nil?
+          $redis[key]
         end
 
         # load from db
         define_method("redis_counter_load_#{attribute}") do
           key = redis_counter_key(attribute)
-          REDIS[key] = send(attribute) if REDIS[key].nil?
+          $redis[key] = send(attribute) if $redis[key].nil?
         end
 
         # save to db
@@ -48,15 +48,15 @@ module ActsAsRedisCounter #:nodoc:
           hits = options[:hits].to_i
 
           ttl_key = redis_counter_ttl_key(attribute)
-          expired = REDIS[ttl_key].nil?
+          expired = $redis[ttl_key].nil?
 
           # save to db
           if (redis_value - db_value) > hits or expired
             send(:update_attribute, attribute, redis_value)
 
             # set ttl key expiration
-            REDIS[ttl_key] = 1
-            REDIS.expire ttl_key, options[:ttl].to_i
+            $redis[ttl_key] = 1
+            $redis.expire ttl_key, options[:ttl].to_i
           end
         end
 
@@ -70,7 +70,7 @@ module ActsAsRedisCounter #:nodoc:
             update_attribute(attribute, redis_value)
           end
 
-          REDIS.del redis_counter_key(attribute), redis_counter_ttl_key(attribute)
+          $redis.del redis_counter_key(attribute), redis_counter_ttl_key(attribute)
         end
 
         # declare private methods
